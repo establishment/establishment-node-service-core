@@ -1,0 +1,33 @@
+{
+  "name": "establishment-node-service-core",
+  "version": "0.1.0",
+  "description": "Establishment's web platform stack NodeJS services core library",
+  "main": "source/EntryPoint.js6.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/establishment/establishment-node-service-core.git"
+  },
+  "keywords": [
+    "establishment",
+    "framework",
+    "core",
+    "util",
+    "service",
+    "redis"
+  ],
+  "author": "Establishment Framework <establishment.framework@gmail.com>",
+  "license": "(Unlicense or Public-Domain)",
+  "bugs": {
+    "url": "https://github.com/establishment/establishment-node-service-core/issues"
+  },
+  "homepage": "https://github.com/establishment/establishment-node-service-core#readme",
+  "dependencies": {
+    "establishment-node-core": "latest"
+  },
+  "devDependencies": {
+    "establishment-node-core": "latest"
+  }
+}
