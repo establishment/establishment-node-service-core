@@ -27,7 +27,7 @@ module.exports.queryMachineId = (callback) => {
     if (machineIdScript) {
         module.exports.machineId = Util.execute(machineIdScript, (error, stdout, stderr) => {
             if (error) {
-                ServiceGlue.logger.critical("Establishment::Util: failed to execute getMachineId script!");
+                Glue.logger.critical("Establishment::Util: failed to execute getMachineId script!");
                 return;
             }
             if (stdout.toUpperCase() != "NONE") {
