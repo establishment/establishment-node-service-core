@@ -1,19 +1,16 @@
 const EventEmitter = require('events');
 
 const Glue = require("../Glue.js6.js");
-const {RedisConnectionPool} = require("establishment-node-core");
+const {RedisConnectionPool, RedisQueue} = require("establishment-node-core");
 
 class PermissionChecker extends EventEmitter {
     constructor(config) {
         super();
-        this.redisPermissionChannel = config.redis.stream.permission;
-        this.redisIdentificationChannel = config.redis.stream.identification;
+        this.redisPermissionResponseStream = config.redis.permission.responseStream;
+        this.redisIdentificationResponseStream = config.redis.identification.responseStream;
+        this.redisPermissionQueue = new RedisQueue(config.redis.permission.queueName, config.redis.address);
+        this.redisIdentificationQueue = new RedisQueue(config.redis.identification.queueName, config.redisAddress);
         this.redisSubscriberClient = RedisConnectionPool.getConnection(config.redis.address);
-        this.redisPublisherClient = RedisConnectionPool.getSharedConnection(config.redis.address);
-
-        this.redisPublisherClient.on("error", (err) => {
-            Glue.logger.error("Establishment::PermissionChecker publisher: " + err);
-        });
 
         this.redisSubscriberClient.on("error", (err) => {
             Glue.logger.error("Establishment::PermissionChecker subscriber: " + err);
@@ -33,20 +30,14 @@ class PermissionChecker extends EventEmitter {
             this.processRedisMessage(channel, message);
         });
 
-        this.redisPermissionChannelQuestion = this.redisPermissionChannel + "-q";
-        this.redisPermissionChannelAnswer = this.redisPermissionChannel + "-a";
-
-        this.redisIdentificationChannelQuestion = this.redisIdentificationChannel + "-q";
-        this.redisIdentificationChannelAnswer = this.redisIdentificationChannel + "-a";
-
-        this.redisSubscriberClient.subscribe(this.redisPermissionChannelAnswer);
-        this.redisSubscriberClient.subscribe(this.redisIdentificationChannelAnswer);
+        this.redisSubscriberClient.subscribe(this.redisPermissionResponseStream);
+        this.redisSubscriberClient.subscribe(this.redisIdentificationResponseStream);
     }
 
     processRedisMessage(channel, message) {
-        if (channel == this.redisPermissionChannelAnswer) {
+        if (channel == this.redisPermissionResponseStream) {
             this.processPermissionAnswer(message);
-        } else if (channel == this.redisIdentificationChannelAnswer) {
+        } else if (channel == this.redisIdentificationResponseStream) {
             this.processIdentificationAnswer(message);
         }
     }
@@ -117,16 +108,18 @@ class PermissionChecker extends EventEmitter {
     requestPermission(userId, channel) {
         let request = {
             "userId": userId,
-            "streamName": channel
+            "streamName": channel,
+            "responseStream": this.redisPermissionResponseStream
         };
-        this.redisPublisherClient.publish(this.redisPermissionChannelQuestion, JSON.stringify(request));
+        this.redisPermissionQueue.push(request);
     }
 
     requestIdentification(sessionKey) {
         let request = {
-            "sessionKey": sessionKey
+            "sessionKey": sessionKey,
+            "responseStream": this.redisIdentificationResponseStream
         };
-        this.redisPublisherClient.publish(this.redisIdentificationChannelQuestion, JSON.stringify(request));
+        this.redisIdentificationQueue.push(request);
     }
 
     link(permissionDispatcher) {
