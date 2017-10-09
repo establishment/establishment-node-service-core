@@ -10,8 +10,8 @@ class PermissionDispatcher {
     registerIdentification(permissionReceiver) {
         let session = permissionReceiver.getSession();
         if (session == null) {
-            Glue.logger.info("Establishment::PermissionDispatcher: tried to register identification for an " +
-                             "permissionReceiver that does not have a session id. Skipping ...");
+            // Glue.logger.info("Establishment::PermissionDispatcher: tried to register identification for an " +
+            //                  "permissionReceiver that does not have a session id. Skipping ...");
             return;
         }
         let permissionReceivers = null;
@@ -27,8 +27,8 @@ class PermissionDispatcher {
     registerPermission(permissionReceiver, channel) {
         let userId = permissionReceiver.getUserId();
         if (userId == -1) {
-            Glue.logger.info("Establishment::PermissionDispatcher: tried to register permission for an " +
-                             "permissionReceiver that does not have a user id. SKipping ...");
+            // Glue.logger.info("Establishment::PermissionDispatcher: tried to register permission for an " +
+            //                  "permissionReceiver that does not have a user id. SKipping ...");
             return;
         }
         let userIds = null;
